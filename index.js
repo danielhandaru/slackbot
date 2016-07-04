@@ -330,7 +330,6 @@ controller.hears(['who am I though', 'who am i'], ['mention'], function(bot, mes
 
 
 
-/*
 controller.hears(['Who is danh?'], ['mention'], function(whichBot, message) {
 
 	bot.api.users.list({},function(err,response) {
@@ -339,7 +338,7 @@ controller.hears(['Who is danh?'], ['mention'], function(whichBot, message) {
 
 	})
 });
-*/
+
 
 
 controller.hears(['Who is amysimmons?'], ['mention'], function(whichBot, message) {
@@ -363,14 +362,13 @@ bot.api.users.list({},function(err,response) {
 			console.log(response.members[i].name);
 
 			whichBot.reply(message, response.members[i].real_name );
+
+	for(i = 0; i < response.members.length; i ++ ) {
+		console.log(response.members[i])
+		controller.hears(["Who is " + response.members[i].name + "?"], ['mention'], function(whichBot, message) {
 		})
 	};
 });
-
-
-
-
-// find the number of users in the list
 
 
 /*

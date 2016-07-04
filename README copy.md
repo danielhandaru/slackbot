@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-# slackbot
->>>>>>> 977bb86a9a1e0f5705cdb4a8127f2627e2b61667
 # Javascript Project 1 - Slackbot
 
 The aim of this project was to set up a number of Slackbot functions and behaviours within the Slack web app using the BotKit, and explore the forms of javascript programming possible within this platform.
