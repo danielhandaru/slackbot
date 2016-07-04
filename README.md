@@ -1,228 +1,24 @@
-# My First Slackbot
+# Javascript Project 1 - Slackbot
 
-This project serves as a base to start creating a slackbot.
+The aim of this project was to set up a number of Slackbot functions and behaviours within the Slack web app using the BotKit, and explore the forms of javascript programming possible within this platform.
 
-The tools used include:
+# Basic Hellos and Responses
 
-- node
-- npm
-- [botkit](https://github.com/howdyai/botkit)
-- [now.sh](https://now.sh)
+The first challenge was simply to have the selected bot give set responses when called. This would help us become familiar with the controller.hears method and how to pass in replies using the whichbot.reply. My next step after getting the bot to reply single sentences or words was to see if I could build a conversation within these constraints. I created a simple conversation based on 'Star Wars', called with 'star wars @bot'. The most limiting aspect was the lack of conditional answers, which meant that the bot's reply would be the same regardless of what the user's response was. I also built a simple conversation about 'Sandwiches'.
 
-## Setup
+#Conditional answers
 
-**Environment**
+I discovered that the if/else statements in the Botkit could be carried out using pre-defined 'patterns', where the bot's answers would change depending on the user's input. You could build multiple levels of conversation and questioning, as long as the bot could make it clear what kind of response was required. It reminded me of the Choose Your Own Adventure books for kids. I wanted to create a small text adventure that the user could go on and complete (or fail) depending on their answers, but time was my enemy. Instead I built a conversation based on the seasons which would spit out literary responses based on the user's input. One important thing to remember was to also create the fallback 'else' statement in case the user inputted something unexpected. This was done by using 'default: true' at end of each conversation tree. This can be called with 'seasons @bot'
 
-For our Slackbot to talk to Slack, it needs a secret token. To ensure the secret
-token isn't accidentally shown to the world, we _environment variables_ that are
-_never_ commited to git or GitHub. These environment variables are stored in a
-file called `.env`.
+#asking and then storing the name of a user through conversation
 
-This project comes with sample environment variables in a file `.env.sample`. To
-get started, copy it to `.env`:
+One interesting thing to look at was how the bot could get and store information that the user had inputted. I tested this with a simple conversation where the bot would ask the user his name. The user was then guided through a pre-built conversation which would end in their name being stored. Afterwards, every time the user would ask the bot his name, the bot would reply using the stored information. The user's reply was stored in a variable called 'user.name'. This conversation can be called by typing either 'Who am i' or 'Who am i though' @bot.
 
-```bash
-$ cp .env.sample .env
-```
+#using users.list
 
-Edit the new `.env` file to add your slack token. For example, if your token was
-`abc123`, you'd edit the file to be:
+The first challenge was to console log the actual users list, along with the rest of the information stored in it. After that was achieved and the list printed out in terminal on load, it was a matter of looking at the data provided and seeing in what way it could be manipulated. I created a simple function to print out certain user's full name from the user list if the bot was asked 'who is [nickname] ?' @bot along with their approximate location (or timezone actually!). I wanted to find a way of using a for loop to iterate through the array and match the nicknames in the list depending on user's input, but the function would not pick up my for loop for some reason and I was only able to use the list if I hard-coded the nicknames into the question. Both my attempts at hard-coding the nicknames and using the for loop are documented in the js.
 
-```
-SLACKBOT_TOKEN=abc123
-```
+I also had an idea to print out both the users name and the color which was associated with that user. I have no idea why, but each user had a hex associated to them in the array. I was able to print out 'full name' is '#hexcolor', but I wanted the #hexcolor to actually change to the selected colour by the bot. I tried a lot of different ways, including storing the textColor in a variable and changing the css of it another variable and taking the value of the #hex and passing that into a style.color function but nothing seemed to work! Maybe because the Slack app is not a website and the elements can't be manipulated using regular css? I have no idea. In any case, a few hours only got me part of the way there before I felt the urge to drop my laptop into the toilet, and that's when I knew I should go to bed and try it another time.
 
-_Remember: The `.env` file should never be added to git, otherwise you will be
-giving away your secret key!_
+Another challenge was that sometimes for no apparent reason the bot would start acting crazy, spitting out lines twice in a row and going to parts of the conversation too early and strangely malfunctioning even though nothing much had recently changed in the js. I found that giving him a few hours of rest and coming back would solve it, so I'm not sure if it it was something I had done or if Slack simply acts up like that with too many changes.
 
-**`now.sh`** !!
-
-We need to deploy our slackbot somewhere, and the easiest way is with the free
-service called [`now`](https://now.sh).
-
-Install `now` onto your machine:
-
-```bash
-$ npm install -g now
-```
-
----
-
-## Making your slackbot
-
-### Getting Started
-
-You'll first need to install the packages this project requires to run:
-
-```bash
-$ npm install
-```
-
-Next, you need to install and save the `botkit` package for this project:
-
-```bash
-$ npm install --save botkit
-```
-
-You will see `botkit` has been added to your `package.json` file for you:
-
-```json
-{
-  ...
-  "dependencies": {
-    "botkit": "^0.2.0",
-    ...
-  }
-  ...
-}
-```
-
-Now that you have `botkit` installed, we can access it in our JavaScript with
-the `require` function:
-
-```javascript
-var Botkit = require('botkit');
-```
-
-### Connecting to Slack
-
-Slack supports a number of different ways for your bot to connect. The most
-basic of which is [Real Time Messaging](http://api.slack.com/rtm) (aka, RTM).
-
-> The Real Time Messaging API is an API that allows you to receive
-> events from Slack in real time and send messages as a user. It is the basis for
-> all Slack clients. It's also commonly used with the bot user integration to
-> create helper bots for your team.
-> 
-> [Slack] will provide a stream of events, including both messages and updates to
-> the current state of the team.
-> 
-> Almost everything that happens in Slack will result in an event being sent [...]
-> The simplest event is a message sent from a user:
-
-Botkit comes with support for RTM ready to go. Here is an example modified
-slightly [from
-botkit's homepage](https://howdy.ai/botkit/#/get-your-bot-online):
-
-```javascript
-var Botkit = require('botkit');
-var controller = Botkit.slackbot();
-var bot = controller.spawn({
-  token: <your-token-here>
-})
-bot.startRTM(function(error, whichBot, payload) {
-  if (error) {
-    throw new Error('Could not connect to Slack');
-  }
-});
-```
-
-Once we've started the connection to the Real Time Messaging API, we can setup
-our bot to listen for keywords, commands, etc.
-
-### Listening
-
-Botkit provides a very useful function `.hears()` that allows our bot to
-optionally listen for different message types. 3 useful ones are:
-  
-* `mention`: When someone uses your bot's name anywhere in their message
-  * > Jess: Hey everyone, check out @awesomebot my new bot!
-* `direct_mention`: When someone starts their message with your bot's name
-  * > Jess: @awesomebot how are you doing?
-* `direct_message`: When someone sends a private chat message to your bot
-
-You can read about more Slack event types [in the botkit
-documentation](https://github.com/howdyai/botkit/blob/master/readme-slack.md#slack-specific-events)
-
-Here is an example of listening for a `mention` message containing the word
-`'hello'`:
-
-```javascript
-controller.hears(['hello'], ['mention'], function(whichBot, message) {
-  whichBot.reply(message, 'Did you say my name?');
-});
-```
-
-To trigger that response, you could post a message such as:
-
-> Jess: Everyone say hello to @awesomebot!
-
-**`.hears()`**
-
-`.hears()` has 3 parameters;
-
-1. An array of phrases to listen for. These phrases can also be [regular
-   expression strings](https://mdn.io/regex)
-2. An array of events to listen to. [See the
-   docs](https://github.com/howdyai/botkit/blob/master/readme-slack.md#slack-specific-events)
-3. A function to execute after a matching event + phrase is received.
-
-### Testing locally
-
-We can test our slackbot locally to make sure it's working. To do so, we use
-`npm` to start up our program:
-
-```bash
-$ npm run start
-```
-
-_Note: This runs the command listed in the `package.json` file under
-`scripts.start`, which is itself starting up `node` with a couple of extra
-options_
-
-Go check out Slack; your bot should now be listening.
-
-To stop it running, type `<Ctrl-C>` on the command line.
-
-### Adcanced Usage
-
-Botkit provides lots of great ways to interact with Slack and its users. [Read
-the
-documentation](https://github.com/howdyai/botkit/blob/master/readme-slack.md#outgoing-webhooks-and-slash-commands)
-to find out more.
-
-If you would like to setup an Outgoing web hook, or a slash command, let your
-instructor know the URL (see _Deploying_ below) and the parameters you'd like to
-setup.
-
----
-
-## Deploying
-
-When you're done testing locally and are ready to deploy your application, make
-sure you're in this project's directory then execute:
-
-```bash
-$ now
-```
-
-_Note: The first time you do this, it will ask for a valid email address. Enter one,
-then go click the link in the email you receive._
-
-`now` will automatically upload and deploy your project for you to the web.
-
-Every time you deploy, `now` will give you a new, unique URL for your project.
-This means **you should delete any previous deployments to avoid having multiple
-copies running at the same time**:
-
-To delete a deployment, first list out the current IDs:
-
-```bash
-$ now list
-
-my-first-slackbot
-
-  VGCt1QVxGMj5i84kfbprKlzH      https://myfirstslackbot-ddwbrdgjjm.now.sh      1h ago
-```
-
-Then, to remove the deploy with id `VGCt1QVxGMj5i84kfbprKlzH`, run:
-
-```bash
-$ now remove VGCt1QVxGMj5i84kfbprKlzH
-```
-
-## All done?
-
-Got a Slackbot up and running, responding to commands? Excellent! Ask your
-instructor for more info on the Slackbot assignment which you are now prepared
-to get started with.
